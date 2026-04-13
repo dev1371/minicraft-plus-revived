@@ -11,8 +11,8 @@ class ItemListMenu extends Menu {
 
 	static Builder getBuilder(RelPos entryPos) {
 		return new Builder(true, 0, entryPos)
-			.setPositioning(new Point(9, 9), RelPos.BOTTOM_RIGHT)
-			.setDisplayLength(9)
+			.setPositioning(new Point(6, 6), RelPos.BOTTOM_RIGHT)
+			.setDisplayLength(12)
 			.setSelectable(true)
 			.setScrollPolicies(1, false)
 			.setSearcherBar(true);

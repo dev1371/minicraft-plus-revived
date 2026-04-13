@@ -59,7 +59,7 @@ Head over [releases](https://github.com/minicraftplus/minicraft-plus-revived/rel
 Minicraft+.
 There, you can find an file called `minicraft_plus.jar`. Click the file, and after you have downloaded the file, you
 must double-click the file in downloads folder to open it.
-You must first confirm that you have [Java](https://www.java.com/en/download/) (at least version 8) installed on your
+You must first confirm that you have [Java](https://www.java.com/en/download/) (at least version 17) installed on your
 computer.
 
 ## Localization
@@ -79,3 +79,15 @@ Because this project uses a build tool called gradle it is very easy to build or
     2. If you get an error screaming that you're missing java. You need
        to [set up](https://confluence.atlassian.com/doc/setting-the-java_home-variable-in-windows-8895.html) your
        JAVA_HOME environment variable, or download a JDK if you haven't already.
+
+## Modding API (experimental)
+
+The project now includes a lightweight extension API in `minicraft.api`:
+
+* `GameApi.registerTile(...)` and `GameApi.unregisterTile(...)` for dynamic tile registration/removal.
+* `GameApi.registerItem(...)` and `GameApi.unregisterItem(...)` for item lifecycle control.
+* `GameApi.on(...)` for typed event subscription (`TileEvent` / `EntityEvent`).
+* `GameApi.registerTileRenderer(...)` and `GameApi.registerEntityRenderer(...)` for custom rendering.
+
+These hooks are intentionally small and stable, so mods can plug in custom behavior without patching core gameplay
+classes.

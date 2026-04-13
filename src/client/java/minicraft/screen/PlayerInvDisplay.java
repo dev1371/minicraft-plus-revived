@@ -22,7 +22,7 @@ import minicraft.util.Logging;
 
 public class PlayerInvDisplay extends Display {
 
-	private static final int padding = 10;
+	private static final int padding = 4;
 
 	private final Player player;
 	private final MinicraftImage counterSheet =

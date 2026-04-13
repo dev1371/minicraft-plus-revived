@@ -5,6 +5,8 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class Items {
 
@@ -19,9 +21,11 @@ public class Items {
 	 * If you want to access one of those items, you do it through this class, by calling get("item name"); casing does not matter.
 	 */
 	private static final ArrayList<Item> items = new ArrayList<>();
+	private static final Map<String, Item> itemsByName = new ConcurrentHashMap<>();
 
 	private static void add(Item i) {
 		items.add(i);
+		itemsByName.put(i.getName().toUpperCase(), i);
 	}
 
 	private static void addAll(ArrayList<Item> items) {
@@ -51,6 +55,23 @@ public class Items {
 
 	public static ArrayList<Item> getAll() {
 		return new ArrayList<>(items);
+	}
+
+	public static synchronized void register(Item item) {
+		if (item == null) return;
+		String key = item.getName().toUpperCase();
+		if (itemsByName.containsKey(key)) {
+			Logging.ITEMS.warn("Item {} is already registered; replacing prototype.", item.getName());
+			items.remove(itemsByName.get(key));
+		}
+		add(item);
+	}
+
+	public static synchronized boolean unregister(String name) {
+		if (name == null) return false;
+		Item existing = itemsByName.remove(name.toUpperCase());
+		if (existing == null) return false;
+		return items.remove(existing);
 	}
 
 	/**
@@ -98,13 +119,7 @@ public class Items {
 		if (name.equals("UNKNOWN"))
 			return new UnknownItem("BLANK");
 
-		Item i = null;
-		for (Item cur : items) {
-			if (cur.getName().equalsIgnoreCase(name)) {
-				i = cur;
-				break;
-			}
-		}
+		Item i = itemsByName.get(name.toUpperCase());
 
 		if (i != null) {
 			i = i.copy();
@@ -146,4 +161,3 @@ public class Items {
 		}
 	}
 }
-

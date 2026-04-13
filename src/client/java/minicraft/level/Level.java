@@ -1,5 +1,8 @@
 package minicraft.level;
 
+import minicraft.api.GameApi;
+import minicraft.api.event.EntityEvent;
+import minicraft.api.event.TileEvent;
 import minicraft.core.Game;
 import minicraft.core.Updater;
 import minicraft.core.io.Localization;
@@ -593,7 +596,7 @@ public class Level {
 		screen.setOffset(xScroll, yScroll);
 		for (int y = yo; y <= h + yo; y++) {
 			for (int x = xo; x <= w + xo; x++) {
-				getTile(x, y).render(screen, this, x, y);
+				GameApi.renderTile(getTile(x, y), screen, this, x, y);
 			}
 		}
 		screen.setOffset(0, 0);
@@ -643,7 +646,7 @@ public class Level {
 		list.sort(spriteSorter);
 		for (Entity e : list) {
 			if (e.getLevel() == this && !e.isRemoved())
-				e.render(screen);
+				GameApi.renderEntity(e, screen);
 			else
 				remove(e);
 		}
@@ -680,6 +683,8 @@ public class Level {
 	}
 
 	public void setTile(int x, int y, Tile t, int dataVal) {
+		TileEvent event = GameApi.publish(new TileEvent(this, x, y, getTile(x, y), t, dataVal));
+		if (event.isCancelled()) return;
 		chunkManager.setTile(x, y, t, dataVal);
 		getTile(x, y).onTileSet(this, x, y);
 	}
@@ -703,6 +708,8 @@ public class Level {
 
 	public void add(Entity entity, int x, int y, boolean tileCoords) {
 		if (entity == null) return;
+		EntityEvent event = GameApi.publish(new EntityEvent(EntityEvent.Type.ADD, this, entity));
+		if (event.isCancelled()) return;
 		if (tileCoords) {
 			x = (x << 4) + 8;
 			y = (y << 4) + 8;
@@ -715,6 +722,8 @@ public class Level {
 	}
 
 	public void remove(Entity e) {
+		EntityEvent event = GameApi.publish(new EntityEvent(EntityEvent.Type.REMOVE, this, e));
+		if (event.isCancelled()) return;
 		entitiesToAdd.remove(e);
 		if (!entitiesToRemove.contains(e))
 			entitiesToRemove.add(e);

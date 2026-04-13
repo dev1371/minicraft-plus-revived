@@ -16,6 +16,8 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 public final class Tiles {
@@ -25,6 +27,7 @@ public final class Tiles {
 	public static ArrayList<String> oldids = new ArrayList<>();
 
 	private static HashMap<Short, Tile> tiles = new HashMap<>();
+	private static final Map<String, Tile> tilesByName = new HashMap<>();
 
 	// Standard tile explosion blacklist
 	// Tiles (as IDs) included cannot be damaged by explosions such as by TNTs and creepers.
@@ -115,15 +118,29 @@ public final class Tiles {
 
 		for (short i = 0; i < 256; i++) {
 			if (tiles.get(i) == null) continue;
+			tilesByName.put(tiles.get(i).name, tiles.get(i));
 			tiles.get(i).id = (short) i;
 		}
 	}
 
 
-	static void add(int id, Tile tile) {
+	public static synchronized void register(short id, Tile tile) {
 		tiles.put((short) id, tile);
+		tilesByName.put(tile.name, tile);
 		Logging.TILES.debug("Adding " + tile.name + " to tile list with id " + id);
 		tile.id = (short) id;
+	}
+
+	static void add(int id, Tile tile) {
+		register((short) id, tile);
+	}
+
+	public static synchronized Optional<Tile> unregister(short id) {
+		Tile removed = tiles.remove(id);
+		if (removed != null) {
+			tilesByName.remove(removed.name);
+		}
+		return Optional.ofNullable(removed);
 	}
 
 	static {
@@ -248,19 +265,11 @@ public final class Tiles {
 
 		//System.out.println("Fetching tile " + name);
 
-		Tile getting = null;
-
 		if (name.contains("_")) {
 			name = name.substring(0, name.indexOf("_"));
 		}
 
-		for (Tile t : tiles.values()) {
-			if (t == null) continue;
-			if (t.name.equals(name)) {
-				getting = t;
-				break;
-			}
-		}
+		Tile getting = tilesByName.get(name);
 
 		if (getting == null) {
 			Logging.TILES.info("Invalid tile requested: " + name);
